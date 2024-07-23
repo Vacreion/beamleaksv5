@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeamLeaks - Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/admin.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="site-title">BeamLeaks</h1>
+            <nav>
+                <a href="index.html" aria-label="Home"><i class="fas fa-home"></i> Home</a>
+                <a href="login.html" aria-label="Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="https://discord.gg/exHecpnghA" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> Discord</a>
+                <a href="about.html" aria-label="About The Staff"><i class="fas fa-users"></i> About The Staff</a>
+            </nav>
+        </header>
+
+        <div id="admin-options">
+            <button id="add-user-btn"><i class="fas fa-user-plus"></i> Add User</button>
+            <button id="manage-users-btn"><i class="fas fa-users-cog"></i> Manage Users</button>
+            <button id="manage-mods-btn"><i class="fas fa-cogs"></i> Manage Mods</button>
+            <button id="upload-btn"><i class="fas fa-upload"></i> Upload</button> <!-- New button -->
+        </div>
+
+        <div id="admin-content">
+            <h2>Admin Panel</h2>
+            <!-- Admin content goes here -->
+        </div>
+    </div>
+</body>
+</html>
