@@ -333,3 +333,52 @@ button[type="submit"]:hover {
         width: 90%;
     }
 }
+
+#mod-request-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+#mod-request-form input {
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #333;
+    background-color: #2c2c2c;
+    color: white;
+}
+
+#mod-request-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #FF6600;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 20px;
+}
+
+#mod-request-form button:hover {
+    background-color: #FF8533;
+    transform: translateY(-3px);
+}
+
+#upload-status {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+#upload-status.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#upload-status.error {
+    background-color: #f44336;
+    color: white;
+}

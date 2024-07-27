@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit a Mod Request</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1 id="site-title">BeamLeaks</h1>
+        <nav>
+            <a href="index.html" aria-label="Home"><i class="fas fa-home"></i> Home</a>
+            <a href="login.html" aria-label="Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="https://discord.gg/exHecpnghA" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> Discord</a>
+            <a href="about.html" aria-label="About The Staff"><i class="fas fa-users"></i> About The Staff</a>
+            <a href="mod-request.html" aria-label="Mod Request">Mod Request</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Submit a Mod Request</h1>
+            <form id="mod-request-form" action="/submit_mod_request" method="post"> <!-- Add action URL if applicable -->
+                <div class="form-group">
+                    <label for="modName">Mod Name:</label>
+                    <input type="text" id="modName" name="modName" placeholder="Enter mod name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="modAuthor">Mod Author:</label>
+                    <input type="text" id="modAuthor" name="modAuthor" placeholder="Enter mod author" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="modLink">Link to Mod:</label>
+                    <input type="url" id="modLink" name="modLink" placeholder="Enter mod URL" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="discordUser">Your Discord User (optional):</label>
+                    <input type="text" id="discordUser" name="discordUser" placeholder="Your Discord username">
+                </div>
+
+                <button type="submit">Submit Request</button>
+            </form>
+
+            <div id="upload-status"></div>
+        </div>
+    </main>
+
+    <footer>
+        <!-- Your site's footer content -->
+        <p>&copy; 2024 BeamLeaks. All rights reserved.</p>
+    </footer>
+
+    <script src="mod_request.js"></script>
+</body>
+</html>
