@@ -1,5 +1,5 @@
 import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDocs, getDoc, query, where, limit, startAfter, orderBy } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 const auth = getAuth();
 const db = getFirestore();
@@ -8,14 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const addUserBtn = document.getElementById('add-user-btn');
     const manageUsersBtn = document.getElementById('manage-users-btn');
     const manageModsBtn = document.getElementById('manage-mods-btn');
-    const uploadBtn = document.getElementById('upload-btn'); // New button element
+    const uploadBtn = document.getElementById('upload-btn');
+    const exportUsersBtn = document.getElementById('export-users-btn');
+    const exportModsBtn = document.getElementById('export-mods-btn');
 
     addUserBtn.addEventListener('click', showAddUserForm);
     manageUsersBtn.addEventListener('click', showUsersList);
     manageModsBtn.addEventListener('click', showModsList);
-    uploadBtn.addEventListener('click', () => { // Add event listener
-        window.location.href = 'upload.html'; // Navigate to upload.html
+    uploadBtn.addEventListener('click', () => {
+        window.location.href = 'upload.html';
     });
+    exportUsersBtn.addEventListener('click', exportUsers);
+    exportModsBtn.addEventListener('click', exportMods);
 });
 
 function showAddUserForm() {
@@ -58,18 +62,41 @@ async function addUser(e) {
     }
 }
 
-async function showUsersList() {
+async function showUsersList(lastVisible = null, searchTerm = '') {
     const content = document.getElementById('admin-content');
-    content.innerHTML = '<h3>Manage Users</h3>';
+    content.innerHTML = `
+        <h3>Manage Users</h3>
+        <input type="text" id="user-search" placeholder="Search users...">
+        <div id="users-list"></div>
+        <button id="load-more-users">Load More</button>
+    `;
+
+    const usersList = document.getElementById('users-list');
+    const loadMoreBtn = document.getElementById('load-more-users');
+    const searchInput = document.getElementById('user-search');
+
+    searchInput.addEventListener('input', debounce(() => showUsersList(null, searchInput.value), 300));
 
     try {
-        const usersSnapshot = await getDocs(collection(db, 'users'));
+        let q = query(collection(db, 'users'), orderBy('email'), limit(10));
+
+        if (searchTerm) {
+            q = query(q, where('email', '>=', searchTerm), where('email', '<=', searchTerm + '\uf8ff'));
+        }
+
+        if (lastVisible) {
+            q = query(q, startAfter(lastVisible));
+        }
+
+        const usersSnapshot = await getDocs(q);
+        
         if (usersSnapshot.empty) {
-            content.innerHTML += '<p>No users found.</p>';
+            usersList.innerHTML += '<p>No users found.</p>';
+            loadMoreBtn.style.display = 'none';
         } else {
             usersSnapshot.forEach((doc) => {
                 const user = doc.data();
-                content.innerHTML += `
+                usersList.innerHTML += `
                     <div>
                         <p>Email: ${user.email} | Role: ${user.role}</p>
                         <button onclick="changeUserRole('${doc.id}', '${user.role}')">Change Role</button>
@@ -77,10 +104,13 @@ async function showUsersList() {
                     </div>
                 `;
             });
+
+            const lastVisibleUser = usersSnapshot.docs[usersSnapshot.docs.length - 1];
+            loadMoreBtn.onclick = () => showUsersList(lastVisibleUser, searchTerm);
         }
     } catch (error) {
         console.error('Error fetching users:', error);
-        content.innerHTML += '<p>Error loading users. Please try again.</p>';
+        usersList.innerHTML += '<p>Error loading users. Please try again.</p>';
     }
 }
 
@@ -113,18 +143,41 @@ window.deleteUser = async function(userId) {
     }
 }
 
-async function showModsList() {
+async function showModsList(lastVisible = null, searchTerm = '') {
     const content = document.getElementById('admin-content');
-    content.innerHTML = '<h3>Manage Mods</h3>';
+    content.innerHTML = `
+        <h3>Manage Mods</h3>
+        <input type="text" id="mod-search" placeholder="Search mods...">
+        <div id="mods-list"></div>
+        <button id="load-more-mods">Load More</button>
+    `;
+
+    const modsList = document.getElementById('mods-list');
+    const loadMoreBtn = document.getElementById('load-more-mods');
+    const searchInput = document.getElementById('mod-search');
+
+    searchInput.addEventListener('input', debounce(() => showModsList(null, searchInput.value), 300));
 
     try {
-        const modsSnapshot = await getDocs(collection(db, 'mods'));
+        let q = query(collection(db, 'mods'), orderBy('title'), limit(10));
+
+        if (searchTerm) {
+            q = query(q, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
+        }
+
+        if (lastVisible) {
+            q = query(q, startAfter(lastVisible));
+        }
+
+        const modsSnapshot = await getDocs(q);
+        
         if (modsSnapshot.empty) {
-            content.innerHTML += '<p>No mods found.</p>';
+            modsList.innerHTML += '<p>No mods found.</p>';
+            loadMoreBtn.style.display = 'none';
         } else {
             modsSnapshot.forEach((doc) => {
                 const mod = doc.data();
-                content.innerHTML += `
+                modsList.innerHTML += `
                     <div>
                         <h4>${mod.title}</h4>
                         <p>Author: ${mod.author}</p>
@@ -134,10 +187,13 @@ async function showModsList() {
                     </div>
                 `;
             });
+
+            const lastVisibleMod = modsSnapshot.docs[modsSnapshot.docs.length - 1];
+            loadMoreBtn.onclick = () => showModsList(lastVisibleMod, searchTerm);
         }
     } catch (error) {
         console.error('Error fetching mods:', error);
-        content.innerHTML += '<p>Error loading mods. Please try again.</p>';
+        modsList.innerHTML += '<p>Error loading mods. Please try again.</p>';
     }
 }
 
@@ -187,4 +243,59 @@ window.deleteMod = async function(modId) {
             alert('Failed to delete mod: ' + error.message);
         }
     }
+}
+
+async function exportUsers() {
+    try {
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const usersData = usersSnapshot.docs.map(doc => doc.data());
+        const csv = convertToCSV(usersData);
+        downloadCSV(csv, 'users_export.csv');
+    } catch (error) {
+        console.error('Error exporting users:', error);
+        alert('Failed to export users: ' + error.message);
+    }
+}
+
+async function exportMods() {
+    try {
+        const modsSnapshot = await getDocs(collection(db, 'mods'));
+        const modsData = modsSnapshot.docs.map(doc => doc.data());
+        const csv = convertToCSV(modsData);
+        downloadCSV(csv, 'mods_export.csv');
+    } catch (error) {
+        console.error('Error exporting mods:', error);
+        alert('Failed to export mods: ' + error.message);
+    }
+}
+
+function convertToCSV(arr) {
+    const array = [Object.keys(arr[0])].concat(arr);
+    return array.map(row => Object.values(row).map(String).join(',')).join('\n');
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }

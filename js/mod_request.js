@@ -33,7 +33,7 @@ async function submitModRequest(event) {
 
         if (response.ok) {
             alert('Mod request submitted successfully!');
-            document.getElementById('modRequestForm').reset();
+            document.getElementById('mod-request-form').reset();
         } else {
             alert('Failed to submit mod request. Please try again.');
         }
@@ -43,5 +43,12 @@ async function submitModRequest(event) {
     }
 }
 
-// Attach event listener to the form
-document.getElementById('modRequestForm').addEventListener('submit', submitModRequest);
+// Wait for the DOM to be fully loaded before attaching the event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('mod-request-form');
+    if (form) {
+        form.addEventListener('submit', submitModRequest);
+    } else {
+        console.error('Form with id "mod-request-form" not found');
+    }
+});
