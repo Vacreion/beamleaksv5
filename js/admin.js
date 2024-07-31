@@ -1,25 +1,63 @@
-import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDocs, getDoc, query, where, limit, startAfter, orderBy } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 const auth = getAuth();
 const db = getFirestore();
 
-document.addEventListener('DOMContentLoaded', () => {
-    const addUserBtn = document.getElementById('add-user-btn');
-    const manageUsersBtn = document.getElementById('manage-users-btn');
-    const manageModsBtn = document.getElementById('manage-mods-btn');
-    const uploadBtn = document.getElementById('upload-btn');
-    const exportUsersBtn = document.getElementById('export-users-btn');
-    const exportModsBtn = document.getElementById('export-mods-btn');
-
-    addUserBtn.addEventListener('click', showAddUserForm);
-    manageUsersBtn.addEventListener('click', showUsersList);
-    manageModsBtn.addEventListener('click', showModsList);
-    uploadBtn.addEventListener('click', () => {
-        window.location.href = 'upload.html';
+function checkAdminAccess(callback) {
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists() && userDoc.data().role === 'admin') {
+                callback();
+            } else {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'index.html';
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
     });
-    exportUsersBtn.addEventListener('click', exportUsers);
-    exportModsBtn.addEventListener('click', exportMods);
+}
+
+function handleError(error, message) {
+    console.error(error);
+    alert(message + ': ' + error.message);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkAdminAccess(() => {
+        const addUserBtn = document.getElementById('add-user-btn');
+        const manageUsersBtn = document.getElementById('manage-users-btn');
+        const manageModsBtn = document.getElementById('manage-mods-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const exportUsersBtn = document.getElementById('export-users-btn');
+        const exportModsBtn = document.getElementById('export-mods-btn');
+
+        addUserBtn.addEventListener('click', showAddUserForm);
+        manageUsersBtn.addEventListener('click', showUsersList);
+        manageModsBtn.addEventListener('click', showModsList);
+        uploadBtn.addEventListener('click', () => {
+            window.location.href = 'upload.html';
+        });
+        exportUsersBtn.addEventListener('click', exportUsers);
+        exportModsBtn.addEventListener('click', exportMods);
+
+        const loadMoreUsersBtn = document.getElementById('load-more-users');
+        const loadMoreModsBtn = document.getElementById('load-more-mods');
+
+        if (loadMoreUsersBtn) {
+            loadMoreUsersBtn.addEventListener('click', showUsersList);
+        } else {
+            console.warn("'load-more-users' button not found");
+        }
+
+        if (loadMoreModsBtn) {
+            loadMoreModsBtn.addEventListener('click', showModsList);
+        } else {
+            console.warn("'load-more-mods' button not found");
+        }
+    });
 });
 
 function showAddUserForm() {
@@ -47,6 +85,11 @@ async function addUser(e) {
     const password = document.getElementById('password').value;
     const role = document.getElementById('role').value;
 
+    if (!isValidEmail(email) || password.length < 6) {
+        alert('Invalid email or password too short (min 6 characters)');
+        return;
+    }
+
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -57,19 +100,25 @@ async function addUser(e) {
         alert('User added successfully');
         showUsersList();
     } catch (error) {
-        console.error('Error adding user:', error);
-        alert('Failed to add user: ' + error.message);
+        handleError(error, 'Failed to add user');
     }
 }
 
-async function showUsersList(lastVisible = null, searchTerm = '') {
-    const content = document.getElementById('admin-content');
-    content.innerHTML = `
-        <h3>Manage Users</h3>
-        <input type="text" id="user-search" placeholder="Search users...">
-        <div id="users-list"></div>
-        <button id="load-more-users">Load More</button>
-    `;
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+let lastVisibleUser = null;
+
+async function showUsersList(event) {
+    event.preventDefault(); // Prevent default button behavior
+    
+    let q = query(collection(db, 'users'), orderBy('email'), limit(10));
+    
+    if (lastVisibleUser) {
+        q = query(q, startAfter(lastVisibleUser));
+    }
 
     const usersList = document.getElementById('users-list');
     const loadMoreBtn = document.getElementById('load-more-users');
@@ -78,23 +127,16 @@ async function showUsersList(lastVisible = null, searchTerm = '') {
     searchInput.addEventListener('input', debounce(() => showUsersList(null, searchInput.value), 300));
 
     try {
-        let q = query(collection(db, 'users'), orderBy('email'), limit(10));
-
-        if (searchTerm) {
-            q = query(q, where('email', '>=', searchTerm), where('email', '<=', searchTerm + '\uf8ff'));
-        }
-
-        if (lastVisible) {
-            q = query(q, startAfter(lastVisible));
-        }
-
         const usersSnapshot = await getDocs(q);
         
-        if (usersSnapshot.empty) {
+        const items = usersSnapshot.docs.slice(0, 10);
+        const hasMore = usersSnapshot.docs.length > 10;
+
+        if (items.empty) {
             usersList.innerHTML += '<p>No users found.</p>';
             loadMoreBtn.style.display = 'none';
         } else {
-            usersSnapshot.forEach((doc) => {
+            items.forEach((doc) => {
                 const user = doc.data();
                 usersList.innerHTML += `
                     <div>
@@ -105,11 +147,12 @@ async function showUsersList(lastVisible = null, searchTerm = '') {
                 `;
             });
 
-            const lastVisibleUser = usersSnapshot.docs[usersSnapshot.docs.length - 1];
-            loadMoreBtn.onclick = () => showUsersList(lastVisibleUser, searchTerm);
+            lastVisibleUser = items[items.length - 1];
+            loadMoreBtn.onclick = () => showUsersList();
+            loadMoreBtn.style.display = hasMore ? 'block' : 'none';
         }
     } catch (error) {
-        console.error('Error fetching users:', error);
+        handleError(error, 'Error fetching users');
         usersList.innerHTML += '<p>Error loading users. Please try again.</p>';
     }
 }
@@ -122,8 +165,7 @@ window.changeUserRole = async function(userId, currentRole) {
             alert('User role updated successfully');
             showUsersList();
         } catch (error) {
-            console.error('Error updating user role:', error);
-            alert('Failed to update user role: ' + error.message);
+            handleError(error, 'Failed to update user role');
         }
     } else {
         alert('Invalid role. No changes made.');
@@ -137,20 +179,21 @@ window.deleteUser = async function(userId) {
             alert('User deleted successfully');
             showUsersList();
         } catch (error) {
-            console.error('Error deleting user:', error);
-            alert('Failed to delete user: ' + error.message);
+            handleError(error, 'Failed to delete user');
         }
     }
 }
 
-async function showModsList(lastVisible = null, searchTerm = '') {
-    const content = document.getElementById('admin-content');
-    content.innerHTML = `
-        <h3>Manage Mods</h3>
-        <input type="text" id="mod-search" placeholder="Search mods...">
-        <div id="mods-list"></div>
-        <button id="load-more-mods">Load More</button>
-    `;
+let lastVisibleMod = null;
+
+async function showModsList(event) {
+    event.preventDefault(); // Prevent default button behavior
+    
+    let q = query(collection(db, 'mods'), orderBy('title'), limit(10));
+    
+    if (lastVisibleMod) {
+        q = query(q, startAfter(lastVisibleMod));
+    }
 
     const modsList = document.getElementById('mods-list');
     const loadMoreBtn = document.getElementById('load-more-mods');
@@ -159,23 +202,16 @@ async function showModsList(lastVisible = null, searchTerm = '') {
     searchInput.addEventListener('input', debounce(() => showModsList(null, searchInput.value), 300));
 
     try {
-        let q = query(collection(db, 'mods'), orderBy('title'), limit(10));
-
-        if (searchTerm) {
-            q = query(q, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
-        }
-
-        if (lastVisible) {
-            q = query(q, startAfter(lastVisible));
-        }
-
         const modsSnapshot = await getDocs(q);
         
-        if (modsSnapshot.empty) {
+        const items = modsSnapshot.docs.slice(0, 10);
+        const hasMore = modsSnapshot.docs.length > 10;
+
+        if (items.empty) {
             modsList.innerHTML += '<p>No mods found.</p>';
             loadMoreBtn.style.display = 'none';
         } else {
-            modsSnapshot.forEach((doc) => {
+            items.forEach((doc) => {
                 const mod = doc.data();
                 modsList.innerHTML += `
                     <div>
@@ -188,11 +224,12 @@ async function showModsList(lastVisible = null, searchTerm = '') {
                 `;
             });
 
-            const lastVisibleMod = modsSnapshot.docs[modsSnapshot.docs.length - 1];
-            loadMoreBtn.onclick = () => showModsList(lastVisibleMod, searchTerm);
+            lastVisibleMod = items[items.length - 1];
+            loadMoreBtn.onclick = () => showModsList();
+            loadMoreBtn.style.display = hasMore ? 'block' : 'none';
         }
     } catch (error) {
-        console.error('Error fetching mods:', error);
+        handleError(error, 'Error fetching mods');
         modsList.innerHTML += '<p>Error loading mods. Please try again.</p>';
     }
 }
@@ -226,8 +263,7 @@ window.editMod = async function(modId) {
             alert('Mod updated successfully');
             showModsList();
         } catch (error) {
-            console.error('Error updating mod:', error);
-            alert('Failed to update mod: ' + error.message);
+            handleError(error, 'Failed to update mod');
         }
     });
 }
@@ -239,8 +275,7 @@ window.deleteMod = async function(modId) {
             alert('Mod deleted successfully');
             showModsList();
         } catch (error) {
-            console.error('Error deleting mod:', error);
-            alert('Failed to delete mod: ' + error.message);
+            handleError(error, 'Failed to delete mod');
         }
     }
 }
@@ -252,8 +287,7 @@ async function exportUsers() {
         const csv = convertToCSV(usersData);
         downloadCSV(csv, 'users_export.csv');
     } catch (error) {
-        console.error('Error exporting users:', error);
-        alert('Failed to export users: ' + error.message);
+        handleError(error, 'Failed to export users');
     }
 }
 
@@ -264,8 +298,7 @@ async function exportMods() {
         const csv = convertToCSV(modsData);
         downloadCSV(csv, 'mods_export.csv');
     } catch (error) {
-        console.error('Error exporting mods:', error);
-        alert('Failed to export mods: ' + error.message);
+        handleError(error, 'Failed to export mods');
     }
 }
 

@@ -6,52 +6,43 @@
     <title>BeamLeaks - Login</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBwU5BhPXKaEvb7YdVYbrTou7kHfaGjWF8",
-            authDomain: "beamleaksv3.firebaseapp.com",
-            projectId: "beamleaksv3",
-            storageBucket: "beamleaksv3.appspot.com",
-            messagingSenderId: "657885182981",
-            appId: "1:657885182981:web:d113473377db33d9edf06c"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        window.auth = auth;
-        window.db = db;
-    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4757409526235702" crossorigin="anonymous"></script>
+    <script type="module" src="js/firebase-config.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
+    <header>
+        <div class="container header-content">
             <h1 id="site-title">BeamLeaks</h1>
             <nav>
-                <a href="index.html" aria-label="Home"><i class="fas fa-home"></i> Home</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> Discord</a>
-                <a href="about.html" aria-label="About The Staff"><i class="fas fa-users"></i> About The Staff</a>
-		<a href="mod-request.html" aria-label="Mod Request">Mod Request</a>
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
+                <a href="about.html"><i class="fas fa-users"></i> About</a>
+                <a href="mod-request.html">Mod Request</a>
             </nav>
-        </header>
+        </div>
+    </header>
 
-        <main class="login-page">
-            <div class="mod-item" style="max-width: 400px; margin: 20px auto;">
+    <main>
+        <div class="container">
+            <div class="form-container">
                 <h2>Login</h2>
                 <form id="login-form">
-                    <input type="email" id="email" required placeholder="Enter your email">
-                    <input type="password" id="password" required placeholder="Enter your password">
-                    <button type="submit" class="download-button">Login</button>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
                 </form>
-                <p id="login-message" aria-live="polite" style="margin-top: 10px; color: #FF6600;"></p>
+                <p id="login-message"></p>
+                <p>Don't have an account? <a href="signup.html">Register here</a></p>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script type="module" src="js/login.js"></script>
 </body>

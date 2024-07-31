@@ -81,7 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     uploadAllButton.addEventListener('click', async () => {
         const uploadForms = document.querySelectorAll('.upload-form');
-        uploadStatus.textContent = 'Uploading...';
+        let successCount = 0;
+        let failCount = 0;
 
         for (const form of uploadForms) {
             const title = form.querySelector('#title').value;
@@ -121,13 +122,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 await setDoc(doc(db, 'mods', modId), modData);
 
+                successCount++;
                 console.log(`Mod ${title} uploaded successfully.`);
             } catch (error) {
+                failCount++;
                 console.error(`Error uploading mod ${title}:`, error);
             }
+            uploadStatus.textContent = `Uploaded ${successCount} mods. Failed: ${failCount}`;
         }
 
-        uploadStatus.textContent = 'All mods uploaded successfully.';
+        uploadStatus.textContent = `All uploads complete. Success: ${successCount}, Failed: ${failCount}`;
     });
 
     async function uploadFile(path, file, allowedMimeTypes) {

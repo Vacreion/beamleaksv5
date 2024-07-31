@@ -1,17 +1,25 @@
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
 const modsContainer = document.getElementById('mods-container');
 const searchBar = document.getElementById('search-bar');
 const searchButton = document.getElementById('search-button');
 
-let allMods = [];
-
-const fetchMods = async () => {
+const fetchMods = async (searchTerm = '') => {
     const modsCollection = collection(db, 'mods');
-    const snapshot = await getDocs(modsCollection);
+    let q = modsCollection;
+
+    if (searchTerm) {
+        const lowercaseSearchTerm = searchTerm.toLowerCase();
+        q = query(modsCollection, 
+            where('titleLowercase', '>=', lowercaseSearchTerm),
+            where('titleLowercase', '<=', lowercaseSearchTerm + '\uf8ff')
+        );
+    }
+
+    const snapshot = await getDocs(q);
     
-    allMods = [];
+    modsContainer.innerHTML = ''; // Clear existing mods
 
     for (const doc of snapshot.docs) {
         const modData = doc.data();
@@ -32,8 +40,11 @@ const fetchMods = async () => {
             thumbnailUrl
         };
 
-        allMods.push(mod);
-        displayMod(mod);
+        if (!searchTerm || 
+            modData.authorLowercase.includes(lowercaseSearchTerm) || 
+            modData.descriptionLowercase.includes(lowercaseSearchTerm)) {
+            displayMod(mod);
+        }
     }
 };
 
@@ -68,22 +79,27 @@ const displayMod = (mod) => {
     observer.observe(lazyImage);
 };
 
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
 const performSearch = () => {
-    const searchTerm = searchBar.value.toLowerCase();
-    const filteredMods = allMods.filter(mod => 
-        mod.title.toLowerCase().includes(searchTerm) ||
-        mod.author.toLowerCase().includes(searchTerm) ||
-        mod.description.toLowerCase().includes(searchTerm)
-    );
-    modsContainer.innerHTML = '';
-    filteredMods.forEach(displayMod);
+    const searchTerm = searchBar.value;
+    fetchMods(searchTerm);
 };
 
 searchButton.addEventListener('click', performSearch);
-searchBar.addEventListener('keyup', (event) => {
-    if (event.key === 'Enter') {
-        performSearch();
-    }
-});
+searchBar.addEventListener('input', debounce(() => {
+    performSearch();
+}, 300));
 
+// Initial load without search term
 fetchMods();

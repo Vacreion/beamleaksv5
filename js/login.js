@@ -1,41 +1,51 @@
-import { signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    const loginMessage = document.getElementById('login-message');
+const auth = getAuth();
+const db = getFirestore();
 
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const showPasswordText = document.querySelector('.show-password');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        showPasswordText.textContent = 'Hide';
+    } else {
+        passwordInput.type = 'password';
+        showPasswordText.textContent = 'Show';
+    }
+}
 
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+document.getElementById('login-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                switch(userData.role) {
-                    case 'admin':
-                        window.location.href = 'admin.html';
-                        break;
-                    case 'staff':
-                    case 'admin':
-                        window.location.href = 'upload.html';
-                        break;
-                    default:
-                        window.location.href = 'index.html';
-                }
-            } else {
-                loginMessage.textContent = 'User not found. Please contact an administrator.';
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            switch(userData.role) {
+                case 'admin':
+                    window.location.href = 'admin.html';
+                    break;
+                case 'staff':
+                    window.location.href = 'upload.html';
+                    break;
+                case 'user':
+                default:
+                    window.location.href = 'index.html';
             }
-        } catch (error) {
-            console.error('Error:', error);
-            loginMessage.textContent = 'Invalid login. Please try again.';
+        } else {
+            alert('User not found. Please contact an administrator.');
         }
-    });
+    } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed: ' + error.message);
+    }
 });
+
+window.togglePassword = togglePassword;
