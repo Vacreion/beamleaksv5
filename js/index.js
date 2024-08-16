@@ -1,59 +1,63 @@
-import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+import { collection, getDocs, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 import { ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
 
 const modsContainer = document.getElementById('mods-container');
 const searchBar = document.getElementById('search-bar');
 const searchButton = document.getElementById('search-button');
+const filterButtons = document.querySelectorAll('.filter-button');
+
+let currentFilter = 'recent';
 
 const fetchMods = async (searchTerm = '') => {
     const modsCollection = collection(db, 'mods');
     let q = modsCollection;
 
     if (searchTerm) {
-        const lowercaseSearchTerm = searchTerm.toLowerCase();
         q = query(modsCollection, 
-            where('titleLowercase', '>=', lowercaseSearchTerm),
-            where('titleLowercase', '<=', lowercaseSearchTerm + '\uf8ff')
+            where('title', '>=', searchTerm),
+            where('title', '<=', searchTerm + '\uf8ff')
         );
     }
 
-    const snapshot = await getDocs(q);
-    
-    modsContainer.innerHTML = ''; // Clear existing mods
-
-    for (const doc of snapshot.docs) {
-        const modData = doc.data();
-        const modId = doc.id;
-        
-        let thumbnailUrl = 'path/to/default-thumbnail.png';
-        if (modData.thumbnailPath) {
-            try {
-                thumbnailUrl = await getDownloadURL(ref(storage, modData.thumbnailPath));
-            } catch (error) {
-                console.error('Error getting thumbnail URL:', error);
-            }
-        }
-
-        const mod = {
-            id: modId,
-            ...modData,
-            thumbnailUrl
-        };
-
-        if (!searchTerm || 
-            modData.authorLowercase.includes(lowercaseSearchTerm) || 
-            modData.descriptionLowercase.includes(lowercaseSearchTerm)) {
-            displayMod(mod);
-        }
+    switch (currentFilter) {
+        case 'downloads':
+            q = query(q, orderBy('downloadCount', 'desc'));
+            break;
+        case 'recent':
+            q = query(q, orderBy('createdAt', 'desc'));
+            break;
+        case 'random':
+            // For random, we'll fetch all and then shuffle
+            break;
     }
+
+    q = query(q, limit(200)); // Limit to 200 mods for performance
+
+    const snapshot = await getDocs(q);
+    let mods = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+    if (currentFilter === 'random') {
+        mods = mods.sort(() => Math.random() - 0.5);
+    }
+
+    displayMods(mods);
 };
 
-const displayMod = (mod) => {
+const displayMods = (mods) => {
+    modsContainer.innerHTML = ''; // Clear existing mods
+
+    mods.forEach(mod => {
+        const modElement = createModElement(mod);
+        modsContainer.appendChild(modElement);
+    });
+};
+
+const createModElement = (mod) => {
     const modElement = document.createElement('div');
     modElement.classList.add('mod-item');
     
     modElement.innerHTML = `
-        <img data-src="${mod.thumbnailUrl}" alt="${mod.title}" class="mod-thumbnail">
+        <img data-src="${mod.thumbnailPath}" alt="${mod.title}" class="mod-thumbnail lazy">
         <div class="mod-info">
             <h3>${mod.title}</h3>
             <p class="mod-author">By ${mod.author}</p>
@@ -63,20 +67,26 @@ const displayMod = (mod) => {
         </div>
     `;
     
-    modsContainer.appendChild(modElement);
-
-    const lazyImage = modElement.querySelector('img[data-src]');
+    const lazyImage = modElement.querySelector('img.lazy');
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const img = entry.target;
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-                observer.unobserve(img);
+                getDownloadURL(ref(storage, img.dataset.src))
+                    .then((url) => {
+                        img.src = url;
+                        img.classList.remove('lazy');
+                        observer.unobserve(img);
+                    })
+                    .catch((error) => {
+                        console.error("Error loading image:", error);
+                    });
             }
         });
     }, { threshold: 0.1 });
     observer.observe(lazyImage);
+
+    return modElement;
 };
 
 const debounce = (func, wait) => {
@@ -92,14 +102,25 @@ const debounce = (func, wait) => {
 };
 
 const performSearch = () => {
-    const searchTerm = searchBar.value;
+    const searchTerm = searchBar.value.toLowerCase();
+    if (searchTerm === 'nebula') {
+        window.location.href = '/nebula.html';
+        return;
+    }
     fetchMods(searchTerm);
 };
 
 searchButton.addEventListener('click', performSearch);
-searchBar.addEventListener('input', debounce(() => {
-    performSearch();
-}, 300));
+searchBar.addEventListener('input', debounce(performSearch, 300));
 
-// Initial load without search term
+filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        currentFilter = button.id.split('-')[1];
+        fetchMods(searchBar.value);
+    });
+});
+
+// Initial load
 fetchMods();

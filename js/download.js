@@ -50,12 +50,16 @@ async function loadModDetails() {
             modContainer.innerHTML = `
                 <h2>${modData.title}</h2>
                 <p>By ${modData.author}</p>
-                <img src="${thumbnailUrl}" alt="${modData.title}" class="mod-thumbnail">
-                ${image1Url ? `<img src="${image1Url}" alt="Image 1" class="mod-image">` : ''}
-                ${image2Url ? `<img src="${image2Url}" alt="Image 2" class="mod-image">` : ''}
+                <div class="mod-images-grid">
+                    <div class="mod-image-wrapper">
+                        <img src="${thumbnailUrl}" alt="${modData.title}" class="mod-image">
+                    </div>
+                    ${image1Url ? `<div class="mod-image-wrapper"><img src="${image1Url}" alt="Additional image 1" class="mod-image"></div>` : ''}
+                    ${image2Url ? `<div class="mod-image-wrapper"><img src="${image2Url}" alt="Additional image 2" class="mod-image"></div>` : ''}
+                </div>
                 <p>${modData.description}</p>
-                ${modData.features ? `<p>Features: ${modData.features}</p>` : ''}
-                <p>Downloads: ${modData.downloadCount || 0}</p>
+                ${modData.features ? `<p><strong>Features:</strong> ${modData.features}</p>` : ''}
+                <p><strong>Downloads:</strong> ${modData.downloadCount || 0}</p>
                 <a href="${modFileUrl}" class="download-button" download="${modData.title}.zip">Download Mod</a>
             `;
 

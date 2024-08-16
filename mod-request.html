@@ -1,38 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4757409526235702"
+     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Meet the staff behind BeamLeaks, your source for BeamNG.drive mods.">
-    <title>BeamLeaks - About The Staff</title>
+    <title>Submit a Mod Request - BeamLeaks</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4757409526235702" crossorigin="anonymous"></script>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
+    <div class="container">
+        <header>
             <h1 id="site-title">BeamLeaks</h1>
             <nav>
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
-                <a href="about.html"><i class="fas fa-users"></i> About</a>
-                <a href="mod-request.html">Mod Request</a>
+                <a href="index.html" aria-label="Home"><i class="fas fa-home"></i> Home</a>
+                <a href="login.html" aria-label="Login"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="https://discord.gg/YckX3S8crE" target="_blank" aria-label="Discord"><i class="fab fa-discord"></i> Discord</a>
+                <a href="about.html" aria-label="About The Staff"><i class="fas fa-users"></i> About The Staff</a>
+                <a href="mod-request.html" aria-label="Mod Request">Mod Request</a>
             </nav>
-        </div>
-    </header>
+        </header>
 
-    <main>
-        <div class="container">
-            <h2>About The Staff</h2>
-            <p>Meet the team behind BeamLeaks, your go-to source for BeamNG.drive mods.</p>
-            <div class="staff-members">
-                <!-- Staff member cards will be dynamically loaded here -->
+        <main>
+            <h2>Submit a Mod Request</h2>
+            <div class="mod-item" style="max-width: 600px; margin: 0 auto;">
+                <form id="mod-request-form">
+                    <div class="form-group">
+                        <label for="modName">Mod Name:</label>
+                        <input type="text" id="modName" name="modName" placeholder="Enter mod name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modAuthor">Mod Author:</label>
+                        <input type="text" id="modAuthor" name="modAuthor" placeholder="Enter mod author" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modLink">Link to Mod:</label>
+                        <input type="url" id="modLink" name="modLink" placeholder="Enter mod URL" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discordUser">Your Discord User (optional):</label>
+                        <input type="text" id="discordUser" name="discordUser" placeholder="Your Discord username">
+                    </div>
+
+                    <button type="submit" class="download-button">Submit Request</button>
+                </form>
             </div>
-        </div>
-    </main>
+            <p id="upload-status"></p>
+        </main>
+    </div>
 
-    <script type="module" src="js/about.js"></script>
+    <script type="module" src="js/mod_request.js"></script>
 </body>
 </html>

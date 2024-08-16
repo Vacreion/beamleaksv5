@@ -3,175 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeamLeaks - Login</title>
+    <title>BeamLeaks - Home</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script type="module" src="js/firebase-config.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4757409526235702" crossorigin="anonymous"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+        import { getStorage } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwU5BhPXKaEvb7YdVYbrTou7kHfaGjWF8",
+            authDomain: "beamleaksv3.firebaseapp.com",
+            projectId: "beamleaksv3",
+            storageBucket: "beamleaksv3.appspot.com",
+            messagingSenderId: "657885182981",
+            appId: "1:657885182981:web:d113473377db33d9edf06c",
+            measurementId: "G-DL5V933Y34"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+        window.db = db;
+        window.storage = storage;
+        window.auth = auth;
+    </script>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
+    <div class="container">
+        <header>
             <h1 id="site-title">BeamLeaks</h1>
             <nav>
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="index.html" aria-current="page"><i class="fas fa-home"></i> Home</a>
                 <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
+                <a href="https://discord.gg/YckX3S8crE" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i> Discord</a>
                 <a href="about.html"><i class="fas fa-users"></i> About</a>
                 <a href="mod-request.html">Mod Request</a>
+                <a href="signup.html"><i class="fas fa-user-plus"></i> Sign Up</a>
             </nav>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <h2>Login</h2>
-            <form>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email">
+        </header>
+        <main>
+            <section id="search-section">
+                <div id="search-container">
+                    <div id="search-bar-wrapper">
+                        <input type="text" id="search-bar" placeholder="Search mods..." aria-label="Search mods">
+                        <button id="search-button" aria-label="Search"><i class="fas fa-search"></i></button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password">
+            </section>
+            <section id="filter-section">
+                <div id="filter-container" class="filter-buttons">
+                    <button id="filter-downloads" class="filter-button">Most Downloaded</button>
+                    <button id="filter-recent" class="filter-button active">Most Recent</button>
+                    <button id="filter-random" class="filter-button">Random</button>
                 </div>
-                <button class="btn">Login</button>
-            </form>
-        </div>
-    </main>
-
-    <script type="module" src="js/login.js"></script>
-</body>
-</html>
-```
-
-```html:signup.html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeamLeaks - Sign Up</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script type="module" src="js/firebase-config.js"></script>
-</head>
-<body>
-    <header>
-        <div class="container header-content">
-            <h1 id="site-title">BeamLeaks</h1>
-            <nav>
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
-                <a href="about.html"><i class="fas fa-users"></i> About</a>
-                <a href="mod-request.html">Mod Request</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <h2>Sign Up</h2>
-            <form>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email">
+            </section>
+            <section id="welcome-section">
+                <h2>Welcome to BeamLeaks</h2>
+                <p>Download the latest mods for BeamNG.drive!</p>
+            </section>
+            <section id="mods-section">
+                <div id="mods-container">
+                    <!-- Mods will be dynamically loaded here -->
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password">
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirm Password</label>
-                    <input type="password" id="confirm-password" placeholder="Confirm your password">
-                </div>
-                <button class="btn">Sign Up</button>
-            </form>
-        </div>
-    </main>
-
-    <script type="module" src="js/signup.js"></script>
-</body>
-</html>
-```
-
-```html:about.html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeamLeaks - About The Staff</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
-    <header>
-        <div class="container header-content">
-            <h1 id="site-title">BeamLeaks</h1>
-            <nav>
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
-                <a href="about.html"><i class="fas fa-users"></i> About</a>
-                <a href="mod-request.html">Mod Request</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <h2>About The Staff</h2>
-            <p>Information about the staff will go here.</p>
-        </div>
-    </main>
-</body>
-</html>
-```
-
-```html:mod-request.html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeamLeaks - Mod Request</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
-    <header>
-        <div class="container header-content">
-            <h1 id="site-title">BeamLeaks</h1>
-            <nav>
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="https://discord.gg/YckX3S8crE" target="_blank"><i class="fab fa-discord"></i> Discord</a>
-                <a href="about.html"><i class="fas fa-users"></i> About</a>
-                <a href="mod-request.html">Mod Request</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <div class="container">
-            <h2>Mod Request</h2>
-            <form>
-                <div class="form-group">
-                    <label for="mod-name">Mod Name</label>
-                    <input type="text" id="mod-name" placeholder="Enter the mod name">
-                </div>
-                <div class="form-group">
-                    <label for="mod-description">Mod Description</label>
-                    <textarea id="mod-description" placeholder="Enter the mod description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="mod-link">Mod Link</label>
-                    <input type="url" id="mod-link" placeholder="Enter the mod link">
-                </div>
-                <button class="btn">Request Mod</button>
-            </form>
-        </div>
-    </main>
+            </section>
+        </main>
+    </div>
+    <script type="module" src="js/index.js"></script>
 </body>
 </html>

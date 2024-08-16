@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula's Secret Page</title>
+    <style>
+        body {
+            background-color: #0a0a2a;
+            background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+            radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+            radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #content {
+            text-align: center;
+            max-width: 600px;
+        }
+        #message {
+            display: none;
+            text-align: left;
+            white-space: pre-wrap;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #4a4a7f;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228DFF, 0 0 70px #228DFF, 0 0 80px #228DFF, 0 0 100px #228DFF, 0 0 150px #228DFF;
+        }
+        input, button {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #4a4a7f;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>Who are you?</h1>
+        <input type="text" id="nameInput">
+        <button onclick="revealMessage()">Submit</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        function revealMessage() {
+            const name = document.getElementById('nameInput').value;
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+            
+            const text = `Hello! ${name}, Wow! You found the last easter egg... Well while you're here may as well have a chat, sit down.
+
+Working with the BeamLeaks staff team was a really happy, yet stressful time for me, I was just learning how to build websites and the thrill of creation was fresh to me. Obviously I had coded before then, but small things purely for me, and then all of a sudden I'm at the head of a website with thousands of visits weekly. I loved that feeling and I worked hard to make sure I kept feeling it, but I wasn't being mindful. I would stay up super late every night working, sometimes not sleeping at all! Which obviously is not a super crazy thing for a teenager to do but it was EVERY night... work work work... all for a feeling! There was no pay, no real reason aside from the Joy Of Creation. Which is why I ultimately had to take a break, or maybe I left forever who knows! Maybe I'm back by the time you are reading this. Anyway, I've had my speech, you are welcome to go about your day now :3`;
+
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    message.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 50);
+                }
+            }
+            typeWriter();
+        }
+    </script>
+</body>
+</html>

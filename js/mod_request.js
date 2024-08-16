@@ -1,54 +1,50 @@
-// mod_request.js
+import dotenv from 'dotenv';
 
-// This function handles form submission and sends data to Discord webhook
-async function submitModRequest(event) {
-    event.preventDefault();
+// Load environment variables
+dotenv.config();
 
-    // Get form values
-    const modName = document.getElementById('modName').value;
-    const modAuthor = document.getElementById('modAuthor').value;
-    const modLink = document.getElementById('modLink').value;
-    const discordUser = document.getElementById('discordUser').value;
+// Use the environment variable
+const webhookURL = process.env.DISCORD_WEBHOOK_URL;
 
-    // Construct the message to send to Discord
-    const message = {
-        content: `**New Mod Request**\n\n` +
-                 `**Mod Name:** ${modName}\n` +
-                 `**Mod Author:** ${modAuthor}\n` +
-                 `**Link to Mod:** ${modLink}\n` +
-                 `**Discord User:** ${discordUser || 'Not provided'}`
-    };
+document.addEventListener('DOMContentLoaded', () => {
+    const modRequestForm = document.getElementById('mod-request-form');
+    const statusMessage = document.getElementById('status-message');
 
-    // Replace with your Discord webhook URL
-    const webhookURL = 'https://discord.com/api/webhooks/1266450034522591283/AA2WvNlxFhO7qw0P2tL9qYkNviRUOmMACTIakjDJc3QU-zzDNOT-WigB672slXkAJyAI';
+    modRequestForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    try {
-        const response = await fetch(webhookURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(message)
-        });
+        const modName = document.getElementById('mod-name').value;
+        const modDescription = document.getElementById('mod-description').value;
 
-        if (response.ok) {
-            alert('Mod request submitted successfully!');
-            document.getElementById('mod-request-form').reset();
-        } else {
-            alert('Failed to submit mod request. Please try again.');
+        const message = {
+            content: 'New Mod Request',
+            embeds: [{
+                title: 'Mod Request Details',
+                fields: [
+                    { name: 'Mod Name', value: modName },
+                    { name: 'Description', value: modDescription }
+                ]
+            }]
+        };
+
+        try {
+            const response = await fetch(webhookURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            });
+
+            if (response.ok) {
+                statusMessage.textContent = 'Mod request submitted successfully!';
+                modRequestForm.reset();
+            } else {
+                throw new Error('Failed to submit mod request');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            statusMessage.textContent = 'Failed to submit mod request. Please try again.';
         }
-    } catch (error) {
-        console.error('Error submitting mod request:', error);
-        alert('An error occurred. Please try again.');
-    }
-}
-
-// Wait for the DOM to be fully loaded before attaching the event listener
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('mod-request-form');
-    if (form) {
-        form.addEventListener('submit', submitModRequest);
-    } else {
-        console.error('Form with id "mod-request-form" not found');
-    }
+    });
 });

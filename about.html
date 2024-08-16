@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -31,15 +31,45 @@
                     <h3>Daimy</h3>
                     <p><strong>Hey! I'm Daimy I founded BeamLeaks.</strong></p>
                     <p>How it started: It started as a place for people to download mods that anywhere else, would cost money. I gained 100 discord members within a day and a week later I decided a website would be useful for people, with all the mods in one easy to use place!</p>
-                    <p style="font-size: smaller;">Wanna Talk? Contact me on Discord @ itz_daimy.</p>
+                    <pstyle="font-size: smaller;">Wanna Talk? Contact me on Discord @ itz_daimy.</p>
                 </article>
-                <article class="staff-member">
-                    <h3>Nebula</h3>
+
+                <<article class="staff-member">
+                    <h3>Nebula <span id="retired-text">[RETIRED]</span></h3>
                     <p>Hi, I'm just some random guy the owner met one day and I coded this website for him lol</p>
                     <p>Also I like cats.</p>
                     <p style="font-size: smaller;">Wanna Talk? Contact me on Discord @ Nebula.jpeg</p>
                     <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG03amV1aTE4ejJlOWEwb21sMGtkM3c3NWVjcG92NjZ5aGlzbWszbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vFKqnCdLPNOKc/giphy.webp" alt="Funny GIF">
                 </article>
+                
+                <style>
+                    #retired-text {
+                        cursor: default;
+                        user-select: none;
+                    }
+                </style>
+                
+                <script>
+                    let clickCount = 0;
+                    const retiredText = document.getElementById('retired-text');
+                    const maxClicks = 5;
+                
+                    retiredText.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        clickCount++;
+                        
+                        if (clickCount === maxClicks) {
+                            window.location.href = 'nebula2.html';
+                        }
+                    });
+                
+                    document.addEventListener('click', function(e) {
+                        if (e.target !== retiredText) {
+                            clickCount = 0;
+                        }
+                    });
+                </script>
+
                 <article class="staff-member">
                     <h3>Tudor</h3>
                     <p><strong>Hey! I'm Tudor, and I upload mods on BeamLeaks.</strong></p>
